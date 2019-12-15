@@ -1,0 +1,52 @@
+module binarytodecimalSevenSegment (input[31:0] binary, output reg [3:0] Ones, output reg [3:0] Tens, output reg [3:0] Hundreds, output reg [3:0] Thousands ,input dclk ,output [6:0] disp_out
+					,output[3:0] anode_out);				
+reg[3:0] OnesR;
+reg[3:0] TensR;
+reg[3:0] HundredsR;
+reg[3:0] ThousandsR;
+reg[31:0] sayi;
+integer i = 31;
+wire [3:0] anode_in;
+wire [6:0] disp_in;
+SevenSegmentMainModule seven( .giris1(Ones), .giris2(Tens), .giris3(Hundreds), 
+.giris4(Thousands), .clk(dclk) , .disp_out(disp_in), .anode_out(anode_in));					
+									 
+always@(posedge dclk)begin
+sayi = binary * 150;
+sayi = sayi >> 12;
+sayi = sayi - 2;
+
+if(ThousandsR >= 5)
+   ThousandsR = ThousandsR + 3;
+if(HundredsR >= 5)
+   HundredsR = HundredsR + 3;
+if(TensR >= 5)
+   TensR = TensR + 3;
+if(OnesR >= 5)
+   OnesR = OnesR + 3;
+ThousandsR = ThousandsR << 1;
+ThousandsR[0] = HundredsR[3];
+HundredsR = HundredsR << 1;
+HundredsR[0] = TensR[3];
+TensR = TensR << 1;
+TensR[0] = OnesR[3];
+OnesR = OnesR << 1;
+OnesR[0] = sayi[i];
+
+if(i > 0)i=i-1;
+else begin 
+Thousands = ThousandsR;
+Hundreds = HundredsR;
+Tens = TensR;
+Ones = OnesR;
+ThousandsR = 0;
+HundredsR = 0;
+TensR = 0;
+OnesR = 0;
+i = 31;
+end
+
+end
+assign disp_out = disp_in;
+assign anode_out = anode_in;
+endmodule
